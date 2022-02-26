@@ -1,630 +1,619 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Tic Tac Toe 2.0</title>
-	<style>
-		:root {
-			--general-bg-color: rgb(0, 0, 0);
-			--second-bg-color: rgb(125, 125, 125);
-			--hover-bg-color: rgb(211, 211, 211);
-			--text-bg-color: rgb(255, 255, 255);
-		}
-
-		* {
-			box-sizing: border-box;
-			margin: 0;
-			padding: 0;
-			font-family: 'Open Sans', sans-serif;
-		}
-
-		body {
-			background-color: var(--text-bg-color);
-
-		}
-
-		header,
-		.game {
-			color: var(--general-bg-color);
-			width: 280px;
-			margin: 20px auto;
-			position: relative;
-		}
-
-		.wrap {
-			display: grid;
-			grid-template-columns: 90px 90px 90px;
-			grid-template-rows: 90px 90px 90px;
-			grid-gap: 5px;
-		}
-
-		.cell {
-			background-color: var(--general-bg-color);
-			color: var(--text-bg-color);
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			font-size: 70px;
-			cursor: pointer;
-		}
-
-		.title {
-			text-align: center;
-			height: 30px;
-		}
-
-		.open-setting-button {
-			position: absolute;
-			right: 15px;
-			top: 5px;
-			cursor: pointer;
-			opacity: .1;
-			transition: opacity .5s ease;
-		}
-
-		.open-setting-button:hover {
-			opacity: 1;
-		}
-
-		.block-controls {
-			width: 280px;
-			height: 280px;
-			padding: 10px;
-			position: absolute;
-			left: 0;
-			top: 0;
-			background-color: var(--text-bg-color);
-			display: none;
-
-			border: 1px solid var(--general-bg-color);
-			box-sizing: border-box;
-		}
-
-		.control-button {
-			display: block;
-			width: 100%;
-			background-color: var(--general-bg-color);
-			padding: 6px 6px;
-			cursor: pointer;
-			margin: 5px 0;
-			color: var(--text-bg-color);
-			text-align: center;
-			border: none;
-			border: 1px solid var(--general-bg-color);
-			box-sizing: border-box;
-		}
-
-		.control-button:hover {
-			background-color: var(--hover-bg-color);
-			color: var(--general-bg-color);
-		}
-
-		.active {
-			color: var(--text-bg-color);
-			display: block;
-			background-color: var(--general-bg-color);
-		}
-
-		select {
-			width: 100px;
-			position: relative;
-			color: var(--general-bg-color);
-			background-color: var(--text-bg-color);
-		}
-
-		option {
-			text-align: right;
-		}
-
-		option:disabled {
-			color: var(--hover-bg-color);
-		}
-
-		.control-item {
-			display: block;
-			position: relative;
-			height: 25px;
-		}
-
-		.left {
-			position: absolute;
-			left: 0;
-		}
-
-		.right {
-			position: absolute;
-			right: 0;
-		}
-
-		.ended-in-victory {
-			background-color: rgb(56, 199, 56);
-		}
-
-		.ended-in-defeat {
-			background-color: rgb(243, 3, 3);
-		}
-
-		.ended-in-a-tie {
-			background-color: var(--second-bg-color);
-		}
-
-		.hover:hover {
-			background-color: var(--second-bg-color);
-		}
-
-		.off-btn-newgame {
-			opacity: .5;
-		}
-
-		.off-btn-newgame:hover {
-			background-color: var(--general-bg-color);
-			color: var(--text-bg-color);
-			cursor: default;
-		}
-
-		.stat {
-			text-align: center;
-			margin: 10px 0 20px;
-			display: grid;
-			grid-template-columns: 1fr 1fr 1fr;
-			grid-template-rows: 50px;
-			font-size: 25px;
-			align-items: center;
-		}
-
-		.win-label {
-			font-size: 14px;
-		}
-	</style>
-</head>
-
-<body>
-
-	<header class="title">
-		<h2>Tic-Tac-Toe<sup style="font-size: 10px;">v2.0</sup></h2>
-		<span class="open-setting-button">
-			<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAMAAAC6V+0/AAABJmlDQ1BBZG9iZSBSR0IgKDE5OTgpAAAoz2NgYDJwdHFyZRJgYMjNKykKcndSiIiMUmA/z8DGwMwABonJxQWOAQE+IHZefl4qAwb4do2BEURf1gWZxUAa4EouKCoB0n+A2CgltTiZgYHRAMjOLi8pAIozzgGyRZKywewNIHZRSJAzkH0EyOZLh7CvgNhJEPYTELsI6Akg+wtIfTqYzcQBNgfClgGxS1IrQPYyOOcXVBZlpmeUKBhaWloqOKbkJ6UqBFcWl6TmFit45iXnFxXkFyWWpKYA1ULcBwaCEIWgENMAarTQZKAyAMUDhPU5EBy+jGJnEGIIkFxaVAZlMjIZE+YjzJgjwcDgv5SBgeUPQsykl4FhgQ4DA/9UhJiaIQODgD4Dw745AMDGT/0ZOjZcAAAAMFBMVEXm5ub///8AAAAxMTG+vr6Tk5NjY2MHBwcICAgJCQkKCgoLCwsMDAwNDQ0ODg4PDw+BthOFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFyGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDYwLCAyMDIwLzA1LzEyLTE2OjA0OjE3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIyLTAxLTI1VDEwOjQ5OjQzKzAzOjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0wMS0yNVQxMDo1MDo1NyswMzowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0wMS0yNVQxMDo1MDo1NyswMzowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjIiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MTE0YTUyMDAtMjRlMy0xZjQ4LWEwZDEtYzQ0ZmY3ZWVlZjgzIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ODI0MjAwYzMtNDkwOS02NDRhLWFlYWItYzBkYzkxYjZkZTg4IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6ZTU0YzA5MTEtZjU1Zi1jMzQ2LTg0ZDEtNmQwMDdiNjU2ODYwIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDplNTRjMDkxMS1mNTVmLWMzNDYtODRkMS02ZDAwN2I2NTY4NjAiIHN0RXZ0OndoZW49IjIwMjItMDEtMjVUMTA6NDk6NDMrMDM6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4yIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MTE0YTUyMDAtMjRlMy0xZjQ4LWEwZDEtYzQ0ZmY3ZWVlZjgzIiBzdEV2dDp3aGVuPSIyMDIyLTAxLTI1VDEwOjUwOjU3KzAzOjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+67976AAAAGRJREFUGNNtUYsSwCAIQv7/o9d8kM7pXZ1ESAaDp4EksoAvPNsBJ/bWzkx2oRXCrIHB5IxgcsUVbCouKikTdq/EcXPTXai5db+lyQ82TeHXKORoP55i55igtmug5rVGD32Hy0Q+paAB/ROPFysAAAAASUVORK5CYII=" alt="Settings">
-		</span>
-	</header>
-
-	<main class="game">
-
-		<div class="wrap">
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-			<div class="cell hover"></div>
-		</div>
-
-		<div class="block-controls">
-
-			<h2>Настройки</h2>
-
-			<div class="control-item">
-				<span class="left">За кого играть?</span>
-				<span class="right">
-					<select id="who-are-you">
-						<option value="X" selected>Крестики</option>
-						<option value="O">Нолики</option>
-					</select>
-				</span>
-			</div>
-
-			<div class="control-item">
-				<span class="left">Чей первый ход?</span>
-				<span class="right">
-					<select id="who-is-go">
-						<option value="0" selected>Крестики</option>
-						<option value="1">Нолики</option>
-					</select>
-				</span>
-			</div>
-
-			<div class="control-item">
-				<span class="left">Кто твой соперник?</span>
-				<span class="right">
-					<select id="who-is-enemy">
-						<option value="player">Игрок</option>
-						<option value="web-player" disabled>Сеть</option>
-						<option value="ai" selected>ИИ</option>
-					</select>
-				</span>
-			</div>
-
-			<div class="control-item">
-				<span class="left">Сложночть ИИ</span>
-				<span class="right">
-					<select id="how-is-difficult">
-						<option value="easy">Легко</option>
-						<option value="normal" selected>Нормально</option>
-						<option value="hard" disabled>Сложно</option>
-					</select>
-				</span>
-			</div>
-
-			<div class="control-item">
-				<span class="left">Тема оформления</span>
-				<span class="right">
-					<select id="theme-game">
-						<option value="light-theme" selected>Светлая</option>
-						<option value="dark-theme">Тёмная</option>
-					</select>
-				</span>
-			</div>
-
-			<div class="control-buttons">
-				<span id="apply-setting" class="control-button">Применить и выйти</span>
-			</div>
-
-			<div class="control-buttons">
-				<span id="default-setting" class="control-button">Сбросить по умолчанию</span>
-			</div>
-
-			<div class="control-buttons">
-				<span id="reset-statistic" class="control-button">Сбросить статистику</span>
-			</div>
-
-		</div>
-
-		<div class="block-statistic">
-			<div class="stat">
-				<div><span class="win-label">Победы</span><br><span id="win-count">0</span></div>
-				<div><span class="win-label">Ничьи</span><br><span id="tie-count">0</span></div>
-				<div><span class="win-label">Поражения</span><br><span id="los-count">0</span></div>
-			</div>
-
-			<div class="control-buttons">
-				<div id="new-game" class="control-button">Новая игра</div>
-			</div>
-
-		</div>
-
-	</main>
-
-	<footer></footer>
-
-	<script>
-
-		const whoAreYou = document.querySelector('#who-are-you'), // player-cross & player-zero
-			whoIsGo = document.querySelector('#who-is-go'), // 0 & 1
-			whoIsEnemy = document.querySelector('#who-is-enemy'), // player & web-player & ai
-			howIsDifficult = document.querySelector('#how-is-difficult'), // easy & normal & hard
-			themeGame = document.querySelector('#theme-game') // light-theme & dark-theme
-
-		const winCountSpan = document.querySelector('#win-count'),
-			losCountSpan = document.querySelector('#los-count'),
-			tieCountSpan = document.querySelector('#tie-count')
-
-		const btnApplySetting = document.querySelector('#apply-setting'),
-			btnDefaultSetting = document.querySelector('#default-setting'),
-			btnResetStatistic = document.querySelector('#reset-statistic'),
-			btnOpenSetting = document.querySelector('.open-setting-button'),
-			btnNewGame = document.querySelector('#new-game')
-
-		const blockOptions = document.querySelector('.block-controls')
-
-		blockOptions.style.display = 'none'
-
-		const AREA = document.querySelector('.wrap')
-		const BLOCKS = document.querySelectorAll('.cell')
-
-		const GAMECORE = {
-			player1: 'X',
-			player2: 'O',
-			enemy: whoIsEnemy.value,
-			aiLevel: howIsDifficult.value,
-			colorDefault: 'black',
-		}
-
-		const winCombo = [
-			[0,1,2],
-			[3,4,5],
-			[6,7,8],
-
-			[0,3,6],
-			[1,4,7],
-			[2,5,8],
-
-			[0,4,8],
-			[2,4,6],
-		]
-
-		let winCount = 0
-		let losCount = 0
-		let tieCount = 0
-
-		let randomNum = Math.floor(Math.random() * 9)
-
-		let gameOver = false
-		let gameStep = 0
-
-		loadStatistic()
-
-
-		function stepGame(e) {
-			offBtnNewGame()
-			if (!gameOver && e.target.classList.contains('cell') === true && e.target.innerHTML === '') {
-				if (gameStep % 2 === 0) {
-					e.target.innerHTML = GAMECORE.player1
-					gameStep++
-					checkWin()
-
-					if (!gameOver && GAMECORE.enemy === 'ai') {
-						AREA.removeEventListener('click',stepGame)
-
-						setTimeout(() => {
-							AREA.addEventListener('click',stepGame)
-						},500)
-
-						if (GAMECORE.aiLevel === 'easy') {
-							setTimeout(stepEasyBot,500)
-						}
-						if (GAMECORE.aiLevel === 'normal') {
-							setTimeout(stepNormalBot,500)
-						}
-						if (GAMECORE.aiLevel === 'hard') {
-							// этот функционал планируется добавить в будущем!
-						}
-					}
-
-					if (!gameOver && GAMECORE.enemy === 'web-player') {
-						// этот функционал планируется добавить в будущем!
-					}
-				} else {
-					e.target.innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-				}
-			}
-		}
-
-		function startNewGame() {
-			for (let i = 0; i < BLOCKS.length; i++) {
-				BLOCKS[i].classList.remove('ended-in-victory')
-				BLOCKS[i].classList.remove('ended-in-defeat')
-				BLOCKS[i].classList.remove('ended-in-a-tie')
-				BLOCKS[i].classList.add('hover')
-				BLOCKS[i].innerHTML = ''
-			}
-			gameOver = false
-
-			if (GAMECORE.enemy === 'ai' && GAMECORE.player2 === 'O' && gameStep === 1) {
-				setTimeout(stepEasyBot,500)
-			}
-			if (GAMECORE.enemy === 'ai' && GAMECORE.player1 === 'O' && gameStep === 0) {
-				setTimeout(stepEasyBot,500)
-			}
-			if (GAMECORE.enemy === 'ai' && GAMECORE.player1 === 'O' && gameStep === 1) {
-				setTimeout(stepEasyBot,500)
-			}
-
-			if (GAMECORE.enemy === 'player' && GAMECORE.player2 === 'X') gameStep === 0
-			if (GAMECORE.enemy === 'player' && GAMECORE.player2 === 'O') gameStep === 1
-		}
-
-		function gameInit() {
-			AREA.addEventListener('click',stepGame)
-			GAMECORE.player1 = whoAreYou.value
-			GAMECORE.player1 === 'X' ? GAMECORE.player2 = 'O' : GAMECORE.player2 = 'X'
-			GAMECORE.enemy = whoIsEnemy.value
-			GAMECORE.aiLevel = howIsDifficult.value
-			gameStep = +whoIsGo.value
-			if (GAMECORE.player1 === 'O') {
-				gameStep++
-			}
-			GAMECORE.colorDefault = 'black'
-			startNewGame()
-		}
-
-		function checkWin() {
-			for (let i = 0; i < winCombo.length; i++) {
-				if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player1) {
-					BLOCKS[winCombo[i][0]].classList.add('ended-in-victory')
-					BLOCKS[winCombo[i][1]].classList.add('ended-in-victory')
-					BLOCKS[winCombo[i][2]].classList.add('ended-in-victory')
-
-					for (let i = 0; i < BLOCKS.length; i++) {
-						BLOCKS[i].classList.remove('hover')
-					}
-
-					winCount++
-					saveStatistic()
-					onBtnNewGame()
-					winCountSpan.innerHTML = winCount
-					gameOver = true
-					AREA.removeEventListener('click',stepGame)
-					return
-				}
-				if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player2) {
-					BLOCKS[winCombo[i][0]].classList.add('ended-in-defeat')
-					BLOCKS[winCombo[i][1]].classList.add('ended-in-defeat')
-					BLOCKS[winCombo[i][2]].classList.add('ended-in-defeat')
-
-					for (let i = 0; i < BLOCKS.length; i++) {
-						BLOCKS[i].classList.remove('hover')
-					}
-
-					losCount++
-					saveStatistic()
-					onBtnNewGame()
-					losCountSpan.innerHTML = losCount
-					gameOver = true
-					AREA.removeEventListener('click',stepGame)
-					return
-				}
-			}
-
-			if (!gameOver) {
-				let count = 0
-
-				for (let i = 0; i < BLOCKS.length; i++) {
-					if (BLOCKS[i].innerHTML === '') count++
-				}
-
-				if (count === 0) {
-					for (let i = 0; i < BLOCKS.length; i++) {
-						BLOCKS[i].classList.add('ended-in-a-tie')
-						BLOCKS[i].classList.remove('hover')
-					}
-					tieCount++
-					saveStatistic()
-					onBtnNewGame()
-					tieCountSpan.innerHTML = tieCount
-					gameOver = true
-					AREA.removeEventListener('click',stepGame)
-				}
-			}
-		}
-
-		function stepEasyBot() {
-			let randomNum = Math.floor(Math.random() * 9)
-
-			if (BLOCKS[randomNum].innerHTML === '') {
-				BLOCKS[randomNum].innerHTML = GAMECORE.player2
-				gameStep++
-				checkWin()
-				return
-			} else {
-				stepEasyBot()
-			}
-		}
-
-		function stepNormalBot() {
-			for (let i = 0; i < winCombo.length; i++) {
-				if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][2]].innerHTML === '') {
-					BLOCKS[winCombo[i][2]].innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-					return
-				}
-				if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][1]].innerHTML === '' && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player2) {
-					BLOCKS[winCombo[i][1]].innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-					return
-				}
-				if (BLOCKS[winCombo[i][0]].innerHTML === '' && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player2) {
-					BLOCKS[winCombo[i][0]].innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-					return
-				}
-			}
-
-			for (let i = 0; i < winCombo.length; i++) {
-				if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][2]].innerHTML === '') {
-					BLOCKS[winCombo[i][2]].innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-					return
-				}
-				if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][1]].innerHTML === '' && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player1) {
-					BLOCKS[winCombo[i][1]].innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-					return
-				}
-				if (BLOCKS[winCombo[i][0]].innerHTML === '' && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player1) {
-					BLOCKS[winCombo[i][0]].innerHTML = GAMECORE.player2
-					gameStep++
-					checkWin()
-					return
-				}
-			}
-
-			stepEasyBot()
-		}
-
-		function saveStatistic() {
-			let locacStatictic = {
-				win: winCount,
-				los: losCount,
-				tie: tieCount
-			}
-
-			localStorage.setItem('gameStatistic',JSON.stringify(locacStatictic))
-		}
-
-		function loadStatistic() {
-			if (localStorage.hasOwnProperty('gameStatistic')) {
-				let gettingStatistic = {}
-
-				gettingStatistic = JSON.parse(localStorage.getItem('gameStatistic'))
-
-				winCountSpan.innerHTML = winCount = gettingStatistic.win
-				losCountSpan.innerHTML = losCount = gettingStatistic.los
-				tieCountSpan.innerHTML = tieCount = gettingStatistic.tie
-			} else {
-				return
-			}
-		}
-
-		function clearStatistic() {
-			localStorage.removeItem('gameStatistic')
-
-			winCountSpan.innerHTML = winCount = 0
-			losCountSpan.innerHTML = losCount = 0
-			tieCountSpan.innerHTML = tieCount = 0
-		}
-
-		function setDefaultSettings() {
-			GAMECORE.player1 = whoAreYou.value = 'X'
-			GAMECORE.player2 = 'O'
-			whoIsGo.value = 0
-			GAMECORE.enemy = whoIsEnemy.value = 'ai'
-			GAMECORE.aiLevel = howIsDifficult.value = 'normal'
-			themeGame.value = 'light-theme'
-		}
-
-		function offBtnNewGame() {
-			btnNewGame.classList.add('off-btn-newgame')
-			btnNewGame.removeEventListener('click',gameInit)
-		}
-
-		function onBtnNewGame() {
-			btnNewGame.classList.remove('off-btn-newgame')
-			btnNewGame.addEventListener('click',gameInit)
-		}
-
-		function changeTheme() {
-			if (themeGame.value === 'light-theme') {
-				document.documentElement.style.setProperty('--general-bg-color','rgb(0, 0, 0)');
-				document.documentElement.style.setProperty('--second-bg-color','rgb(125, 125, 125)');
-				document.documentElement.style.setProperty('--hover-bg-color','rgb(211, 211, 211)');
-				document.documentElement.style.setProperty('--text-bg-color','rgb(255, 255, 255)');
-			}
-			if (themeGame.value === 'dark-theme') {
-				document.documentElement.style.setProperty('--general-bg-color','rgb(255, 255, 255)');
-				document.documentElement.style.setProperty('--second-bg-color','rgb(230, 230, 230)');
-				document.documentElement.style.setProperty('--hover-bg-color','rgb(75, 75, 75)');
-				document.documentElement.style.setProperty('--text-bg-color','rgb(0, 0, 0)');
-			}
-		}
-
-		const showSettings = () => blockOptions.style.display === 'none' ? blockOptions.style.display = 'block' : blockOptions.style.display = 'none'
-
-		AREA.addEventListener('click',stepGame)
-		btnOpenSetting.addEventListener('click',showSettings)
-		btnNewGame.addEventListener('click',gameInit)
-		btnApplySetting.addEventListener('click',() => {
-			showSettings()
-			gameInit()
-			changeTheme()
-			onBtnNewGame()
-			AREA.addEventListener('click',stepGame)
-		})
-		btnDefaultSetting.addEventListener('click',setDefaultSettings)
-		btnResetStatistic.addEventListener('click',clearStatistic)
-
-	</script>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="img/favicon-light.png" />
+    <title>Tic Tac Toe 2.0</title>
+    <style>
+      :root {
+        --general-bg-color: rgb(0, 0, 0);
+        --second-bg-color: rgb(125, 125, 125);
+        --hover-bg-color: rgb(211, 211, 211);
+        --text-bg-color: rgb(255, 255, 255);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Open Sans", sans-serif;
+      }
+
+      body {
+        background-color: var(--text-bg-color);
+      }
+
+      header,
+      .game {
+        color: var(--general-bg-color);
+        width: 280px;
+        margin: 20px auto;
+        position: relative;
+      }
+
+      .wrap {
+        display: grid;
+        grid-template-columns: 90px 90px 90px;
+        grid-template-rows: 90px 90px 90px;
+        grid-gap: 5px;
+      }
+
+      .cell {
+        background-color: var(--general-bg-color);
+        color: var(--text-bg-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 70px;
+        cursor: pointer;
+      }
+
+      .title {
+        text-align: center;
+        height: 30px;
+      }
+
+      .open-setting-button {
+        position: absolute;
+        right: 15px;
+        top: 5px;
+        cursor: pointer;
+        opacity: 0.1;
+        transition: opacity 0.5s ease;
+      }
+
+      .open-setting-button:hover {
+        opacity: 1;
+      }
+
+      .block-controls {
+        width: 280px;
+        height: 280px;
+        padding: 10px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        background-color: var(--text-bg-color);
+        display: none;
+
+        border: 1px solid var(--general-bg-color);
+        box-sizing: border-box;
+      }
+
+      .control-button {
+        display: block;
+        width: 100%;
+        background-color: var(--general-bg-color);
+        padding: 6px 6px;
+        cursor: pointer;
+        margin: 5px 0;
+        color: var(--text-bg-color);
+        text-align: center;
+        border: none;
+        border: 1px solid var(--general-bg-color);
+        box-sizing: border-box;
+      }
+
+      .control-button:hover {
+        background-color: var(--hover-bg-color);
+        color: var(--general-bg-color);
+      }
+
+      .active {
+        color: var(--text-bg-color);
+        display: block;
+        background-color: var(--general-bg-color);
+      }
+
+      select {
+        width: 100px;
+        position: relative;
+        color: var(--general-bg-color);
+        background-color: var(--text-bg-color);
+      }
+
+      option {
+        text-align: right;
+      }
+
+      option:disabled {
+        color: var(--hover-bg-color);
+      }
+
+      .control-item {
+        display: block;
+        position: relative;
+        height: 25px;
+      }
+
+      .left {
+        position: absolute;
+        left: 0;
+      }
+
+      .right {
+        position: absolute;
+        right: 0;
+      }
+
+      .ended-in-victory {
+        background-color: rgb(56, 199, 56);
+      }
+
+      .ended-in-defeat {
+        background-color: rgb(243, 3, 3);
+      }
+
+      .ended-in-a-tie {
+        background-color: var(--second-bg-color);
+      }
+
+      .hover:hover {
+        background-color: var(--second-bg-color);
+      }
+
+      .off-btn-newgame {
+        opacity: 0.5;
+      }
+
+      .off-btn-newgame:hover {
+        background-color: var(--general-bg-color);
+        color: var(--text-bg-color);
+        cursor: default;
+      }
+
+      .stat {
+        text-align: center;
+        margin: 10px 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 50px;
+        font-size: 25px;
+        align-items: center;
+      }
+
+      .win-label {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="title">
+      <h2>Tic-Tac-Toe<sup style="font-size: 10px">v2.0</sup></h2>
+      <span class="open-setting-button">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAMAAAC6V+0/AAABJmlDQ1BBZG9iZSBSR0IgKDE5OTgpAAAoz2NgYDJwdHFyZRJgYMjNKykKcndSiIiMUmA/z8DGwMwABonJxQWOAQE+IHZefl4qAwb4do2BEURf1gWZxUAa4EouKCoB0n+A2CgltTiZgYHRAMjOLi8pAIozzgGyRZKywewNIHZRSJAzkH0EyOZLh7CvgNhJEPYTELsI6Akg+wtIfTqYzcQBNgfClgGxS1IrQPYyOOcXVBZlpmeUKBhaWloqOKbkJ6UqBFcWl6TmFit45iXnFxXkFyWWpKYA1ULcBwaCEIWgENMAarTQZKAyAMUDhPU5EBy+jGJnEGIIkFxaVAZlMjIZE+YjzJgjwcDgv5SBgeUPQsykl4FhgQ4DA/9UhJiaIQODgD4Dw745AMDGT/0ZOjZcAAAAMFBMVEXm5ub///8AAAAxMTG+vr6Tk5NjY2MHBwcICAgJCQkKCgoLCwsMDAwNDQ0ODg4PDw+BthOFAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFyGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDYwLCAyMDIwLzA1LzEyLTE2OjA0OjE3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIyLTAxLTI1VDEwOjQ5OjQzKzAzOjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0wMS0yNVQxMDo1MDo1NyswMzowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMi0wMS0yNVQxMDo1MDo1NyswMzowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjIiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MTE0YTUyMDAtMjRlMy0xZjQ4LWEwZDEtYzQ0ZmY3ZWVlZjgzIiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ODI0MjAwYzMtNDkwOS02NDRhLWFlYWItYzBkYzkxYjZkZTg4IiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6ZTU0YzA5MTEtZjU1Zi1jMzQ2LTg0ZDEtNmQwMDdiNjU2ODYwIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDplNTRjMDkxMS1mNTVmLWMzNDYtODRkMS02ZDAwN2I2NTY4NjAiIHN0RXZ0OndoZW49IjIwMjItMDEtMjVUMTA6NDk6NDMrMDM6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMS4yIChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6MTE0YTUyMDAtMjRlMy0xZjQ4LWEwZDEtYzQ0ZmY3ZWVlZjgzIiBzdEV2dDp3aGVuPSIyMDIyLTAxLTI1VDEwOjUwOjU3KzAzOjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoV2luZG93cykiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+67976AAAAGRJREFUGNNtUYsSwCAIQv7/o9d8kM7pXZ1ESAaDp4EksoAvPNsBJ/bWzkx2oRXCrIHB5IxgcsUVbCouKikTdq/EcXPTXai5db+lyQ82TeHXKORoP55i55igtmug5rVGD32Hy0Q+paAB/ROPFysAAAAASUVORK5CYII=" alt="Settings" />
+      </span>
+    </header>
+
+    <main class="game">
+      <div class="wrap">
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+        <div class="cell hover"></div>
+      </div>
+
+      <div class="block-controls">
+        <h2>Настройки</h2>
+
+        <div class="control-item">
+          <span class="left">За кого играть?</span>
+          <span class="right">
+            <select id="who-are-you">
+              <option value="X" selected>Крестики</option>
+              <option value="O">Нолики</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="control-item">
+          <span class="left">Чей первый ход?</span>
+          <span class="right">
+            <select id="who-is-go">
+              <option value="0" selected>Крестики</option>
+              <option value="1">Нолики</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="control-item">
+          <span class="left">Кто твой соперник?</span>
+          <span class="right">
+            <select id="who-is-enemy">
+              <option value="player">Игрок</option>
+              <option value="web-player" disabled>Сеть</option>
+              <option value="ai" selected>ИИ</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="control-item">
+          <span class="left">Сложночть ИИ</span>
+          <span class="right">
+            <select id="how-is-difficult">
+              <option value="easy">Легко</option>
+              <option value="normal" selected>Нормально</option>
+              <option value="hard" disabled>Сложно</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="control-item">
+          <span class="left">Тема оформления</span>
+          <span class="right">
+            <select id="theme-game">
+              <option value="light-theme" selected>Светлая</option>
+              <option value="dark-theme">Тёмная</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="control-buttons">
+          <span id="apply-setting" class="control-button">Применить и выйти</span>
+        </div>
+
+        <div class="control-buttons">
+          <span id="default-setting" class="control-button">Сбросить по умолчанию</span>
+        </div>
+
+        <div class="control-buttons">
+          <span id="reset-statistic" class="control-button">Сбросить статистику</span>
+        </div>
+      </div>
+
+      <div class="block-statistic">
+        <div class="stat">
+          <div><span class="win-label">Победы</span><br /><span id="win-count">0</span></div>
+          <div><span class="win-label">Ничьи</span><br /><span id="tie-count">0</span></div>
+          <div><span class="win-label">Поражения</span><br /><span id="los-count">0</span></div>
+        </div>
+
+        <div class="control-buttons">
+          <div id="new-game" class="control-button">Новая игра</div>
+        </div>
+      </div>
+    </main>
+
+    <footer></footer>
+
+    <script>
+      const whoAreYou = document.querySelector("#who-are-you"), // player-cross & player-zero
+        whoIsGo = document.querySelector("#who-is-go"), // 0 & 1
+        whoIsEnemy = document.querySelector("#who-is-enemy"), // player & web-player & ai
+        howIsDifficult = document.querySelector("#how-is-difficult"), // easy & normal & hard
+        themeGame = document.querySelector("#theme-game"); // light-theme & dark-theme
+
+      const winCountSpan = document.querySelector("#win-count"),
+        losCountSpan = document.querySelector("#los-count"),
+        tieCountSpan = document.querySelector("#tie-count");
+
+      const btnApplySetting = document.querySelector("#apply-setting"),
+        btnDefaultSetting = document.querySelector("#default-setting"),
+        btnResetStatistic = document.querySelector("#reset-statistic"),
+        btnOpenSetting = document.querySelector(".open-setting-button"),
+        btnNewGame = document.querySelector("#new-game");
+
+      const blockOptions = document.querySelector(".block-controls");
+
+      blockOptions.style.display = "none";
+
+      const AREA = document.querySelector(".wrap");
+      const BLOCKS = document.querySelectorAll(".cell");
+
+      const GAMECORE = {
+        player1: "X",
+        player2: "O",
+        enemy: whoIsEnemy.value,
+        aiLevel: howIsDifficult.value,
+        colorDefault: "black",
+      };
+
+      const winCombo = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      let winCount = 0;
+      let losCount = 0;
+      let tieCount = 0;
+
+      let randomNum = Math.floor(Math.random() * 9);
+
+      let gameOver = false;
+      let gameStep = 0;
+
+      loadStatistic();
+
+      function stepGame(e) {
+        offBtnNewGame();
+        if (!gameOver && e.target.classList.contains("cell") === true && e.target.innerHTML === "") {
+          if (gameStep % 2 === 0) {
+            e.target.innerHTML = GAMECORE.player1;
+            gameStep++;
+            checkWin();
+
+            if (!gameOver && GAMECORE.enemy === "ai") {
+              AREA.removeEventListener("click", stepGame);
+
+              setTimeout(() => {
+                AREA.addEventListener("click", stepGame);
+              }, 500);
+
+              if (GAMECORE.aiLevel === "easy") {
+                setTimeout(stepEasyBot, 500);
+              }
+              if (GAMECORE.aiLevel === "normal") {
+                setTimeout(stepNormalBot, 500);
+              }
+              if (GAMECORE.aiLevel === "hard") {
+                // этот функционал планируется добавить в будущем!
+              }
+            }
+
+            if (!gameOver && GAMECORE.enemy === "web-player") {
+              // этот функционал планируется добавить в будущем!
+            }
+          } else {
+            e.target.innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+          }
+        }
+      }
+
+      function startNewGame() {
+        for (let i = 0; i < BLOCKS.length; i++) {
+          BLOCKS[i].classList.remove("ended-in-victory");
+          BLOCKS[i].classList.remove("ended-in-defeat");
+          BLOCKS[i].classList.remove("ended-in-a-tie");
+          BLOCKS[i].classList.add("hover");
+          BLOCKS[i].innerHTML = "";
+        }
+        gameOver = false;
+
+        if (GAMECORE.enemy === "ai" && GAMECORE.player2 === "O" && gameStep === 1) {
+          setTimeout(stepEasyBot, 500);
+        }
+        if (GAMECORE.enemy === "ai" && GAMECORE.player1 === "O" && gameStep === 0) {
+          setTimeout(stepEasyBot, 500);
+        }
+        if (GAMECORE.enemy === "ai" && GAMECORE.player1 === "O" && gameStep === 1) {
+          setTimeout(stepEasyBot, 500);
+        }
+
+        if (GAMECORE.enemy === "player" && GAMECORE.player2 === "X") gameStep === 0;
+        if (GAMECORE.enemy === "player" && GAMECORE.player2 === "O") gameStep === 1;
+      }
+
+      function gameInit() {
+        AREA.addEventListener("click", stepGame);
+        GAMECORE.player1 = whoAreYou.value;
+        GAMECORE.player1 === "X" ? (GAMECORE.player2 = "O") : (GAMECORE.player2 = "X");
+        GAMECORE.enemy = whoIsEnemy.value;
+        GAMECORE.aiLevel = howIsDifficult.value;
+        gameStep = +whoIsGo.value;
+        if (GAMECORE.player1 === "O") {
+          gameStep++;
+        }
+        GAMECORE.colorDefault = "black";
+        startNewGame();
+      }
+
+      function checkWin() {
+        for (let i = 0; i < winCombo.length; i++) {
+          if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player1) {
+            BLOCKS[winCombo[i][0]].classList.add("ended-in-victory");
+            BLOCKS[winCombo[i][1]].classList.add("ended-in-victory");
+            BLOCKS[winCombo[i][2]].classList.add("ended-in-victory");
+
+            for (let i = 0; i < BLOCKS.length; i++) {
+              BLOCKS[i].classList.remove("hover");
+            }
+
+            winCount++;
+            saveStatistic();
+            onBtnNewGame();
+            winCountSpan.innerHTML = winCount;
+            gameOver = true;
+            AREA.removeEventListener("click", stepGame);
+            return;
+          }
+          if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player2) {
+            BLOCKS[winCombo[i][0]].classList.add("ended-in-defeat");
+            BLOCKS[winCombo[i][1]].classList.add("ended-in-defeat");
+            BLOCKS[winCombo[i][2]].classList.add("ended-in-defeat");
+
+            for (let i = 0; i < BLOCKS.length; i++) {
+              BLOCKS[i].classList.remove("hover");
+            }
+
+            losCount++;
+            saveStatistic();
+            onBtnNewGame();
+            losCountSpan.innerHTML = losCount;
+            gameOver = true;
+            AREA.removeEventListener("click", stepGame);
+            return;
+          }
+        }
+
+        if (!gameOver) {
+          let count = 0;
+
+          for (let i = 0; i < BLOCKS.length; i++) {
+            if (BLOCKS[i].innerHTML === "") count++;
+          }
+
+          if (count === 0) {
+            for (let i = 0; i < BLOCKS.length; i++) {
+              BLOCKS[i].classList.add("ended-in-a-tie");
+              BLOCKS[i].classList.remove("hover");
+            }
+            tieCount++;
+            saveStatistic();
+            onBtnNewGame();
+            tieCountSpan.innerHTML = tieCount;
+            gameOver = true;
+            AREA.removeEventListener("click", stepGame);
+          }
+        }
+      }
+
+      function stepEasyBot() {
+        let randomNum = Math.floor(Math.random() * 9);
+
+        if (BLOCKS[randomNum].innerHTML === "") {
+          BLOCKS[randomNum].innerHTML = GAMECORE.player2;
+          gameStep++;
+          checkWin();
+          return;
+        } else {
+          stepEasyBot();
+        }
+      }
+
+      function stepNormalBot() {
+        for (let i = 0; i < winCombo.length; i++) {
+          if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][2]].innerHTML === "") {
+            BLOCKS[winCombo[i][2]].innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+            return;
+          }
+          if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][1]].innerHTML === "" && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player2) {
+            BLOCKS[winCombo[i][1]].innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+            return;
+          }
+          if (BLOCKS[winCombo[i][0]].innerHTML === "" && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player2 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player2) {
+            BLOCKS[winCombo[i][0]].innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+            return;
+          }
+        }
+
+        for (let i = 0; i < winCombo.length; i++) {
+          if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][2]].innerHTML === "") {
+            BLOCKS[winCombo[i][2]].innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+            return;
+          }
+          if (BLOCKS[winCombo[i][0]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][1]].innerHTML === "" && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player1) {
+            BLOCKS[winCombo[i][1]].innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+            return;
+          }
+          if (BLOCKS[winCombo[i][0]].innerHTML === "" && BLOCKS[winCombo[i][1]].innerHTML === GAMECORE.player1 && BLOCKS[winCombo[i][2]].innerHTML === GAMECORE.player1) {
+            BLOCKS[winCombo[i][0]].innerHTML = GAMECORE.player2;
+            gameStep++;
+            checkWin();
+            return;
+          }
+        }
+
+        stepEasyBot();
+      }
+
+      function saveStatistic() {
+        let locacStatictic = {
+          win: winCount,
+          los: losCount,
+          tie: tieCount,
+        };
+
+        localStorage.setItem("gameStatistic", JSON.stringify(locacStatictic));
+      }
+
+      function loadStatistic() {
+        if (localStorage.hasOwnProperty("gameStatistic")) {
+          let gettingStatistic = {};
+
+          gettingStatistic = JSON.parse(localStorage.getItem("gameStatistic"));
+
+          winCountSpan.innerHTML = winCount = gettingStatistic.win;
+          losCountSpan.innerHTML = losCount = gettingStatistic.los;
+          tieCountSpan.innerHTML = tieCount = gettingStatistic.tie;
+        } else {
+          return;
+        }
+      }
+
+      function clearStatistic() {
+        localStorage.removeItem("gameStatistic");
+
+        winCountSpan.innerHTML = winCount = 0;
+        losCountSpan.innerHTML = losCount = 0;
+        tieCountSpan.innerHTML = tieCount = 0;
+      }
+
+      function setDefaultSettings() {
+        GAMECORE.player1 = whoAreYou.value = "X";
+        GAMECORE.player2 = "O";
+        whoIsGo.value = 0;
+        GAMECORE.enemy = whoIsEnemy.value = "ai";
+        GAMECORE.aiLevel = howIsDifficult.value = "normal";
+        themeGame.value = "light-theme";
+      }
+
+      function offBtnNewGame() {
+        btnNewGame.classList.add("off-btn-newgame");
+        btnNewGame.removeEventListener("click", gameInit);
+      }
+
+      function onBtnNewGame() {
+        btnNewGame.classList.remove("off-btn-newgame");
+        btnNewGame.addEventListener("click", gameInit);
+      }
+
+      function changeTheme() {
+        if (themeGame.value === "light-theme") {
+          document.documentElement.style.setProperty("--general-bg-color", "rgb(0, 0, 0)");
+          document.documentElement.style.setProperty("--second-bg-color", "rgb(125, 125, 125)");
+          document.documentElement.style.setProperty("--hover-bg-color", "rgb(211, 211, 211)");
+          document.documentElement.style.setProperty("--text-bg-color", "rgb(255, 255, 255)");
+        }
+        if (themeGame.value === "dark-theme") {
+          document.documentElement.style.setProperty("--general-bg-color", "rgb(255, 255, 255)");
+          document.documentElement.style.setProperty("--second-bg-color", "rgb(230, 230, 230)");
+          document.documentElement.style.setProperty("--hover-bg-color", "rgb(75, 75, 75)");
+          document.documentElement.style.setProperty("--text-bg-color", "rgb(0, 0, 0)");
+        }
+      }
+
+      const showSettings = () => (blockOptions.style.display === "none" ? (blockOptions.style.display = "block") : (blockOptions.style.display = "none"));
+
+      AREA.addEventListener("click", stepGame);
+      btnOpenSetting.addEventListener("click", showSettings);
+      btnNewGame.addEventListener("click", gameInit);
+      btnApplySetting.addEventListener("click", () => {
+        showSettings();
+        gameInit();
+        changeTheme();
+        onBtnNewGame();
+        AREA.addEventListener("click", stepGame);
+      });
+      btnDefaultSetting.addEventListener("click", setDefaultSettings);
+      btnResetStatistic.addEventListener("click", clearStatistic);
+    </script>
+  </body>
 </html>
